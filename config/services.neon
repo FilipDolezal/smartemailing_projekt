@@ -1,0 +1,21 @@
+extensions:
+	guzzle: Contributte\Guzzlette\DI\GuzzleExtension
+
+services: [
+    App\Router\RouterFactory::createRouter
+    App\Models\DatabaseModel
+    App\Models\APIModel
+]
+
+search:
+	-	in: %appDir%
+		classes:
+			- *Factory
+			- *Facade
+
+guzzle:
+	debug: %debugMode%
+	client: [
+		timeout: 30
+        verify: false
+    ]
