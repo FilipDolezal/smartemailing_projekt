@@ -29,11 +29,21 @@
 			<div class="btn-group btn-group-sm">
 				<input n:name="filter" class="btn btn-primary" />
 				<a n:href="Home:get" class="btn btn-outline-primary">Ve formátu JSON</a>
+				<!-- prettier-ignore -->
+				<a n:if="!empty($poss)" n:href="deleteDataFromDB!" class="btn btn-outline-danger">Vymazat data z DB</a>
 			</div>
 		</form>
 	</section>
 
 	<section class="row g-2 overflow-y-scroll">
+		<div
+			n:if="empty($poss)"
+			class="d-flex flex-column justify-content-center align-items-middle text-center">
+			<h2>V databázi nejsou žádné data.</h2>
+			<a n:href="addDataToDB!" class="btn btn-success">
+				Načíst data z API do DB
+			</a>
+		</div>
 		<div n:foreach="$poss as $pos" class="col-12 col-sm-6 col-lg-4">
 			<div class="card">
 				<div class="card-header">

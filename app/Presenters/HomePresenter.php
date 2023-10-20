@@ -28,13 +28,6 @@ final class HomePresenter extends Presenter
     #[Persistent]
     public string $date = "now";
 
-    public function actionAddToDatabase()
-    {
-        $data = $this->api->getPointsOfSale();
-        $this->db->setPointsOfSale($data);
-        $this->sendPayload("success");
-    }
-
     public function actionDefault()
     {
         $this->template->poss = $this->db->getPointsOfSale(
@@ -48,6 +41,19 @@ final class HomePresenter extends Presenter
             new POSFilter($this->open, $this->date)
         );
         $this->sendJson($pos);
+    }
+
+    public function handleDeleteDataFromDB()
+    {
+        $this->db->deleteAll();
+        $this->redirect("this");
+    }
+
+    public function handleAddDataToDB()
+    {
+        $data = $this->api->getPointsOfSale();
+        $this->db->setPointsOfSale($data);
+        $this->redirect("this");
     }
 
     public function createComponentFilterPOS(): POSForm

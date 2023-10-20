@@ -114,6 +114,12 @@ class DatabaseModel
             ->table("points_of_sale_hours")
             ->insert($points_of_sale_hours);
     }
+
+    public function deleteAll(): void
+    {
+        $this->db->table("points_of_sale_hours")->delete();
+        $this->db->table("points_of_sale")->delete();
+    }
 }
 
 /**
