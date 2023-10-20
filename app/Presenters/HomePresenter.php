@@ -28,6 +28,11 @@ final class HomePresenter extends Presenter
     #[Persistent]
     public string $date = "now";
 
+    /**
+     * output v HTML
+     * 
+     * obahuje formulář pro filtry
+     */
     public function actionDefault()
     {
         $this->template->poss = $this->db->getPointsOfSale(
@@ -35,6 +40,9 @@ final class HomePresenter extends Presenter
         );
     }
 
+    /**
+     * output v JSON formátu
+     */
     public function actionGet()
     {
         $pos = $this->db->getPointsOfSale(
@@ -43,12 +51,18 @@ final class HomePresenter extends Presenter
         $this->sendJson($pos);
     }
 
+    /**
+     * handle pro smazání dat z DB
+     */
     public function handleDeleteDataFromDB()
     {
         $this->db->deleteAll();
         $this->redirect("this");
     }
 
+    /**
+     * handle pro přidání dat do db
+     */
     public function handleAddDataToDB()
     {
         $data = $this->api->getPointsOfSale();
@@ -56,6 +70,9 @@ final class HomePresenter extends Presenter
         $this->redirect("this");
     }
 
+    /**
+     * vytvoření komponenty pro filtrování výsledků
+     */
     public function createComponentFilterPOS(): POSForm
     {
         $form = new POSForm;

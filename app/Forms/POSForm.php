@@ -7,6 +7,9 @@ namespace App\Forms;
 use Nette\Application\UI\Form;
 use Nette\Utils\DateTime;
 
+/**
+ * Formulář pro volbu filtrůs
+ */
 class POSForm extends Form
 {
 

@@ -19,3 +19,11 @@ di:
 	export:
 		parameters: no
 		tags: no
+
+
+# CONNECTION TO DATABASE
+# database:
+#     dsn: 'mysql:host=127.0.0.1;dbname=smartemailing_project'
+#     user: 'root'
+#     password:
+

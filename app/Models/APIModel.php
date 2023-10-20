@@ -15,6 +15,10 @@ class APIModel
         $this->client = $client;
     }
 
+    /**
+     * API dotaz pro data prodejen
+     * @return  array raw array data 
+     */
     public function getPointsOfSale(): array
     {
         $response = $this->client->get("https://data.pid.cz/pointsOfSale/json/pointsOfSale.json");
