@@ -1,12 +1,84 @@
 {block content}
-{form filterPOS}
-    {input open}
-    <div id="open-when-toggle">
-    {input when}
-        <div id="open-date-toggle">
-            {input date}
-        </div>
-    </div>
-    {input filter}
-{/form}
 
+<div class="container d-flex flex-column gap-2" style="max-height: 100dvh">
+	<section>
+		<form
+			n:name="filterPOS"
+			class="p-2 d-flex flex-column justify-content-center align-items-center gap-2">
+			<div class="form-check form-switch">
+				<input class="form-check-input" n:name="open" />
+				<label class="form-check-label" n:name="open">
+					<!-- prettier-ignore -->
+					{$form[open]->getLabelPart()}
+				</label>
+			</div>
+			<div id="open-when-toggle">
+				<div class="d-flex flex-column align-items-center gap-2">
+					<div
+						n:inner-foreach="$form[when]->getItems() as $input => $label"
+						class="btn-group btn-group-sm">
+						<input n:name="$form[when]:$input" class="btn-check" />
+						<!-- prettier-ignore -->
+						<label n:name="$form[when]:$input" class="btn btn-outline-primary">{$label}</label>
+					</div>
+					<div id="open-date-toggle">
+						<input n:name="date" class="form-control form-control-sm" />
+					</div>
+				</div>
+			</div>
+			<div class="btn-group btn-group-sm">
+				<input n:name="filter" class="btn btn-primary" />
+				<a n:href="Home:get" class="btn btn-outline-primary">Ve formátu JSON</a>
+			</div>
+		</form>
+	</section>
+
+	<section class="row g-2 overflow-y-scroll">
+		<div n:foreach="$poss as $pos" class="col-12 col-sm-6 col-lg-4">
+			<div class="card">
+				<div class="card-header">
+					<div class="d-flex justify-content-between">
+						<h6>{$pos[name]}</h6>
+						<a n:attr="href: isset($pos[link]) ? $pos[link]">
+							<small>{$pos[id]}</small>
+						</a>
+					</div>
+				</div>
+				<div class="card-body d-flex flex-column gap-1">
+					<span class="card-subtitle">{$pos[address]}</span>
+					<small class="text-muted">{$pos[lat]}, {$pos[lon]}</small>
+				</div>
+				<ul class="list-group list-group-flush">
+					<!-- prettier-ignore -->
+					{var $days = [
+                        0 => 'Po',
+                        1 => 'Út',
+                        2 => 'St',
+                        3 => 'Čt',
+                        4 => 'Pá',
+                        5 => 'So',
+                        6 => 'Ne'
+                    ]}
+					<li
+						n:foreach="$pos[opening_hours] as $schedule"
+						class="list-group-item">
+						<div class="row">
+							<small class="text-muted text-nowrap col-auto">
+								<!-- prettier-ignore -->
+								{if $schedule[day_from] == $schedule[day_to]}
+                                    {$days[$schedule[day_from]]}
+                                {else}
+                                    {$days[$schedule[day_from]]}-{$days[$schedule[day_to]]}
+                                {/if}
+							</small>
+							<small class="text-wrap col">
+								<!-- prettier-ignore -->
+								{$schedule[hours]|explode:","|implode:", "}
+							</small>
+						</div>
+					</li>
+				</ul>
+			</div>
+		</div>
+	</section>
+</div>

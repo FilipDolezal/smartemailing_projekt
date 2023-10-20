@@ -20,26 +20,59 @@ class DatabaseModel
         $this->db = $db;
     }
 
-    /**
-     * @return  PointOfSale[]
-     */
     public function getPointsOfSale(POSFilter $filter): array
     {
-        $selection = $this->db
-            ->table("points_of_sale")
-            ->where($filter->toArray())
-            ->group(":points_of_sale_hours.pos_id");
+        // pokud nefiltrujeme můžeme vrátit všechny záznamy
+        if (!$filter->open) {
+            return array_map(
+                fn (ActiveRow $row) => [
+                    ...$row,
+                    "opening_hours" => array_values($row
+                        ->related("points_of_sale_hours")
+                        ->fetchAssoc("id"))
+                ],
+                $this->db->table("points_of_sale")->fetchAll()
+            );
+        }
 
+        // nejdříve vybereme všechny otevírací doby v daný den
+        $selection = $this->db
+            ->table("points_of_sale_hours")
+            ->select("points_of_sale_hours.*")
+            ->where(
+                "? BETWEEN day_from AND day_to",
+                (intval($filter->date->format("N")) - 1)
+            );
+
+        // vyfiltrujeme ty, které v daný čas nejsou otevřený
+        $open = array_filter($selection->fetchAll(), function ($row) use ($filter) {
+            $intervals = explode(",", $row->hours);
+            foreach ($intervals as $interval) {
+                $times  = preg_split('/(-|–)/', $interval);
+                for ($i = 0; $i < sizeof($times); $i++) {
+                    $p = explode(":", $times[$i]);
+                    $times[$i] = clone $filter->date;
+                    $times[$i]->setTime(intval($p[0]), intval($p[1]));
+                }
+
+                $bool = ($filter->date >= $times[0] && $filter->date <= $times[1]);
+                if ($bool) return true;
+            }
+            return false;
+        });
+
+        // vrátíme vyfiltrované záznamy
         return array_map(
-            function (ActiveRow $info) {
-                $hours = $info->related("points_of_sale_hours", "pos_id");
-                $data = array_merge(
-                    $info->toArray(),
-                    ["opening_hours" => $hours->fetchAssoc("id")]
-                );
-                return $data;
+            function (ActiveRow $row) {
+                $pos = $row->ref("points_of_sale", "pos_id");
+                return [
+                    ...$pos,
+                    "opening_hours" => array_values($pos
+                        ->related("points_of_sale_hours")
+                        ->fetchAssoc("id"))
+                ];
             },
-            $selection->fetchAll()
+            $open
         );
     }
 
@@ -83,10 +116,13 @@ class DatabaseModel
     }
 }
 
-class POSFilter
+/**
+ * Pomocná třída pro filtraci výpisu
+ */
+final class POSFilter
 {
-    private DateTime $date;
-    private bool $open;
+    public DateTime $date;
+    public bool $open;
 
     public function __construct(
         bool $open = false,
@@ -94,32 +130,5 @@ class POSFilter
     ) {
         $this->open = $open;
         $this->date = new DateTime($date);
-    }
-
-    public function toArray(): array
-    {
-        if (!$this->open) return [];
-
-        $day = $this->date->format("N");
-        $hours = $this->date->format("H:i");
-
-        return [
-            "? BETWEEN 
-                SUBSTRING_INDEX(:points_of_sale_hours.hours, '-', 1) 
-            AND 
-                SUBSTRING_INDEX(:points_of_sale_hours.hours, '-', -1)"
-            => $hours,
-
-            "? BETWEEN 
-                :points_of_sale_hours.day_from 
-            AND 
-                :points_of_sale_hours.day_to"
-            => $day
-        ];
-    }
-
-    public function __invoke(): array
-    {
-        return $this->toArray();
     }
 }

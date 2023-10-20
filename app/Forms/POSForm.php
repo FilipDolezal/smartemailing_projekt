@@ -40,15 +40,18 @@ class POSForm extends Form
             ->addConditionOn($when, Form::EQUAL, "date")
             ->addRule(Form::REQUIRED, "Vyplňte datum návštěvy prodejního místa.");
 
-        $this->addSubmit("filter", "Filtrovat");
+        $this->addSubmit("filter", "Zobrazit");
     }
 
     public function getValues($returnType = null, ?array $controls = null)
     {
+        // vyhodnoť jaké filtry jsou zapnuté a v jaké kombinaci
         $v = parent::getValues($returnType, $controls);
         return [
             "open" => $v["open"],
-            "date" => ($v["when"] == "now") ? "now" : $v["date"]
+            "date" => $v["open"] ?
+                (($v["when"] == "now") ? "now" : $v["date"])
+                : "now"
         ];
     }
 }

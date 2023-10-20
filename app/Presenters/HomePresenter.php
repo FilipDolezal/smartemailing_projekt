@@ -8,9 +8,9 @@ use App\Forms\POSForm;
 use App\Models\APIModel;
 use App\Models\DatabaseModel;
 use App\Models\POSFilter;
-use Exception;
 use Nette\Application\UI\Form;
 use Nette\Application\UI\Presenter;
+use Nette\Application\Attributes\Persistent;
 
 use Nette\Utils\DateTime;
 
@@ -22,6 +22,12 @@ final class HomePresenter extends Presenter
     /** @var APIModel @inject */
     public APIModel $api;
 
+    #[Persistent]
+    public bool $open = false;
+
+    #[Persistent]
+    public string $date = "now";
+
     public function actionAddToDatabase()
     {
         $data = $this->api->getPointsOfSale();
@@ -29,17 +35,31 @@ final class HomePresenter extends Presenter
         $this->sendPayload("success");
     }
 
-    public function actionGet(bool $open = false, string $date = "now")
+    public function actionDefault()
     {
-        $pos = $this->db->getPointsOfSale(new POSFilter($open, $date));
+        $this->template->poss = $this->db->getPointsOfSale(
+            new POSFilter($this->open, $this->date)
+        );
+    }
+
+    public function actionGet()
+    {
+        $pos = $this->db->getPointsOfSale(
+            new POSFilter($this->open, $this->date)
+        );
         $this->sendJson($pos);
     }
 
     public function createComponentFilterPOS(): POSForm
     {
         $form = new POSForm;
+        $form->setDefaults([
+            "open" => $this->open,
+            "date" => $this->date,
+            "when" => $this->date == "now" ? "now" : "date"
+        ]);
         $form->onSuccess[] = function (Form $form, array $filter) {
-            $this->redirect("get", $filter);
+            $this->redirect("this", $filter);
         };
         return $form;
     }

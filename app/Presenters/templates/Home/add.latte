@@ -1,12 +1,1 @@
 {block content}
-<div class="container">
-    <ul class="list-group">
-        <li  n:foreach="$poss as $pos" class="list-group-item">
-            <div class="flex">
-                <span class="text-muted">{$pos->id}</span>
-                <span class="text-muted">({$pos->type})</span>
-                <span>{$pos->name}</span>
-            </div>
-        </li>
-    </ul>
-</div>
