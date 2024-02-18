@@ -1,5 +1,8 @@
 # SmartEmailing projekt
 
+Tento projekt je reakcí na testovací zadání od společnosti SmartEmailing.cz
+Jedná se o jednoduchou webovou aplikaci pro demonstraci Nette, PHP, mySQL a API dovednostní
+
 ## Setup:
 
 - proveďte instalaci závislostí
